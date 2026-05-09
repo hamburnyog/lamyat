@@ -100,6 +100,7 @@
         ribbonBox: false,
         paymentMethod: 'gcash',
         shipping: { fullName: '', phone: '', address: '', city: 'Metro Manila' },
+        isProcessing: false,
         
         navigateTo(page, product = null) {
             this.currentPage = page;
@@ -125,9 +126,35 @@
             return total;
         },
         get cartCount() { return this.cart.reduce((t, i) => t + i.quantity, 0); },
-        removeItem(id) { this.cart = this.cart.filter(i => i.id !== id); }
+        removeItem(id) { this.cart = this.cart.filter(i => i.id !== id); },
+        processPayment() {
+            this.isProcessing = true;
+            setTimeout(() => {
+                this.isProcessing = false;
+                this.checkoutStep = 3;
+                this.cart = [];
+                this.cartOpen = false;
+            }, 3000);
+        }
     }" 
     class="bg-lamyat-cream text-lamyat-brown font-sans selection:bg-lamyat-gold selection:text-white antialiased">
+
+    <!-- Loading Overlay -->
+    <div x-show="isProcessing" 
+         x-cloak
+         class="fixed inset-0 z-[200] bg-lamyat-cream/90 backdrop-blur-md flex items-center justify-center">
+        <div class="text-center space-y-8 animate-fade-in">
+            <div class="relative w-24 h-24 mx-auto">
+                <div class="absolute inset-0 border-4 border-lamyat-gold/20 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-lamyat-gold rounded-full border-t-transparent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-4xl animate-bounce">🍪</div>
+            </div>
+            <div class="space-y-2">
+                <h3 class="font-serif text-2xl font-bold italic text-lamyat-brown">Processing your Payment</h3>
+                <p class="text-xs font-black uppercase tracking-[0.3em] text-lamyat-gold animate-pulse">Please wait...</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Full Image Modal -->
     <div x-show="modalImg" 
@@ -267,14 +294,14 @@
         </div>
 
         <!-- PRODUCT VIEW -->
-        <div x-show="currentPage === 'product' && activeProduct" x-cloak x-transition:enter="transition duration-500" class="py-24">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
-                    <div class="sticky top-32">
-                        <img :src="mainImg" @click="modalImg = mainImg" class="w-full aspect-square object-cover rounded-[4rem] shadow-2xl transition-all duration-500 cursor-zoom-in hover:scale-[1.02]">
+        <div x-show="currentPage === 'product' && activeProduct" x-cloak x-transition:enter="transition duration-500" class="py-12 md:py-24">
+            <div class="max-w-7xl mx-auto px-6 sm:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+                    <div class="lg:sticky lg:top-32 space-y-8 md:space-y-12">
+                        <img :src="mainImg" @click="modalImg = mainImg" class="w-full aspect-square object-cover rounded-[2.5rem] md:rounded-[4rem] shadow-2xl transition-all duration-500 cursor-zoom-in hover:scale-[1.02]">
                         
                         <!-- Product Variations (Interactive) -->
-                        <div class="mt-8 grid grid-cols-4 gap-4">
+                        <div class="grid grid-cols-4 gap-4">
                             <!-- Thumbnail 1 (Chewy) -->
                             <div @click="mainImg = activeProduct.img" 
                                  :class="mainImg === activeProduct.img ? 'border-lamyat-gold shadow-md' : 'border-transparent opacity-50'"
@@ -293,8 +320,8 @@
                             </div>
                         </div>
 
-                        <!-- Anatomy Breakdown -->
-                        <div class="mt-12 bg-white p-10 rounded-[3rem] border-2 border-lamyat-gold/10">
+                        <!-- Anatomy Breakdown (Hidden on mobile, shown on desktop) -->
+                        <div class="hidden lg:block bg-white p-10 rounded-[3rem] border-2 border-lamyat-gold/10">
                             <h4 class="font-serif text-2xl font-bold italic mb-6 text-lamyat-gold">Anatomy of a Lamyat</h4>
                             <ul class="space-y-4">
                                 <template x-for="layer in activeProduct?.anatomy">
@@ -303,27 +330,39 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="space-y-12">
+
+                    <div class="space-y-10 md:space-y-12">
                         <div>
-                            <h1 class="font-serif text-7xl font-bold italic mb-6" x-text="activeProduct?.name"></h1>
-                            <p class="text-xl text-lamyat-brown/60 leading-relaxed mb-8" x-text="activeProduct?.desc"></p>
+                            <h1 class="font-serif text-5xl md:text-7xl font-bold italic mb-6" x-text="activeProduct?.name"></h1>
+                            <p class="text-lg md:text-xl text-lamyat-brown/60 leading-relaxed mb-8" x-text="activeProduct?.desc"></p>
                         </div>
+
+                        <!-- Anatomy Breakdown (Shown on mobile only) -->
+                        <div class="lg:hidden bg-white p-8 rounded-[2rem] border-2 border-lamyat-gold/10">
+                            <h4 class="font-serif text-xl font-bold italic mb-6 text-lamyat-gold">Anatomy of a Lamyat</h4>
+                            <ul class="space-y-4">
+                                <template x-for="layer in activeProduct?.anatomy">
+                                    <li class="flex items-center space-x-4"><span class="w-1.5 h-1.5 bg-lamyat-gold rounded-full"></span><span class="font-bold text-xs uppercase tracking-widest text-lamyat-brown/70" x-text="layer"></span></li>
+                                </template>
+                            </ul>
+                        </div>
+
                         <div class="space-y-6">
                             <label class="text-[10px] font-black uppercase tracking-widest text-lamyat-gold">Select Your Portion</label>
                             <div class="grid grid-cols-1 gap-4">
                                 <template x-for="p in portions">
-                                    <button @click="selectedPortion = p.name" :class="selectedPortion === p.name ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl text-left flex justify-between items-center transition-all">
-                                        <div><span class="font-bold text-lg block" x-text="p.name"></span><span class="text-xs text-lamyat-brown/50" x-text="p.desc"></span></div>
-                                        <span class="font-black text-lamyat-gold" x-text="p.count > 1 ? `Box of ${p.count}` : '1 Piece'"></span>
+                                    <button @click="selectedPortion = p.name" :class="selectedPortion === p.name ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-5 md:p-6 rounded-3xl text-left flex justify-between items-center transition-all">
+                                        <div><span class="font-bold text-base md:text-lg block" x-text="p.name"></span><span class="text-[10px] md:text-xs text-lamyat-brown/50" x-text="p.desc"></span></div>
+                                        <span class="font-black text-lamyat-gold text-xs md:text-base" x-text="p.count > 1 ? `Box of ${p.count}` : '1 Piece'"></span>
                                     </button>
                                 </template>
                             </div>
                         </div>
-                        <div class="bg-lamyat-ube/10 p-8 rounded-[2.5rem] flex items-center space-x-8 border border-lamyat-ube/20">
-                            <div class="text-4xl">🔥</div>
-                            <div><h4 class="font-black uppercase tracking-widest text-xs text-lamyat-ube mb-1">Lamyat Pro-Tip</h4><p class="text-sm font-medium text-lamyat-ube/80">Pop it in the microwave or air fryer for **30 seconds** for the ultimate experience.</p></div>
+                        <div class="bg-lamyat-ube/10 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] flex items-center space-x-6 md:space-x-8 border border-lamyat-ube/20">
+                            <div class="text-3xl md:text-4xl">🔥</div>
+                            <div><h4 class="font-black uppercase tracking-widest text-[10px] text-lamyat-ube mb-1">Lamyat Pro-Tip</h4><p class="text-xs md:text-sm font-medium text-lamyat-ube/80 leading-relaxed">Pop it in the microwave or air fryer for **30 seconds** for the ultimate experience.</p></div>
                         </div>
-                        <button @click="addToCart(activeProduct, selectedPortion)" class="w-full bg-lamyat-brown text-white font-bold py-6 rounded-full hover:bg-lamyat-gold transition-all duration-500 shadow-2xl uppercase tracking-[0.3em] text-sm">Add to Tray</button>
+                        <button @click="addToCart(activeProduct, selectedPortion)" class="w-full bg-lamyat-brown text-white font-bold py-5 md:py-6 rounded-full hover:bg-lamyat-gold transition-all duration-500 shadow-2xl uppercase tracking-[0.3em] text-xs md:text-sm">Add to Tray</button>
                     </div>
                 </div>
             </div>
@@ -530,6 +569,36 @@
                         </button>
                     </div>
 
+                    <!-- Itemized Order Summary -->
+                    <div class="bg-white p-8 rounded-[2rem] border-2 border-lamyat-brown/5 space-y-6">
+                        <h3 class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-gold">Order Summary</h3>
+                        <div class="divide-y divide-lamyat-brown/5">
+                            <template x-for="item in cart" :key="item.id">
+                                <div class="py-4 flex justify-between items-center">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 rounded-xl overflow-hidden bg-lamyat-cream flex-shrink-0">
+                                            <img :src="item.img" class="w-full h-full object-cover">
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-sm" x-text="item.displayName"></p>
+                                            <p class="text-[10px] text-lamyat-brown/40 font-bold uppercase tracking-widest" x-text="'Qty: ' + item.quantity + ' • ₱' + item.finalPrice"></p>
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-sm" x-text="'₱' + (item.finalPrice * item.quantity)"></span>
+                                </div>
+                            </template>
+                            
+                            <!-- Ribbon Box Add-on -->
+                            <div x-show="ribbonBox" class="py-4 flex justify-between items-center text-lamyat-gold">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 rounded-xl bg-lamyat-gold/10 flex items-center justify-center text-xl">🎀</div>
+                                    <p class="font-bold text-sm">Premium Ribboned Box</p>
+                                </div>
+                                <span class="font-bold text-sm">+₱100</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-lamyat-brown/5">
                         <div x-show="paymentMethod !== 'card'" class="text-center py-6">
                             <p class="text-sm text-lamyat-brown/60 mb-6">Redirecting to <span class="font-bold uppercase" x-text="paymentMethod"></span> for <span class="font-bold text-lamyat-brown" x-text="'₱' + cartTotal"></span>.</p>
@@ -550,7 +619,7 @@
 
                     <div class="flex items-center justify-between pt-8 border-t border-lamyat-brown/10">
                         <button @click="checkoutStep = 1" class="text-lamyat-brown/40 font-bold uppercase tracking-widest text-xs hover:text-lamyat-brown transition-colors">Back</button>
-                        <button @click="checkoutStep = 3; cart = []; cartOpen = false" class="bg-lamyat-brown text-white font-bold px-12 py-5 rounded-full hover:bg-lamyat-gold transition-all shadow-xl uppercase tracking-widest text-sm">Pay <span x-text="'₱' + cartTotal"></span></button>
+                        <button @click="processPayment()" class="bg-lamyat-brown text-white font-bold px-12 py-5 rounded-full hover:bg-lamyat-gold transition-all shadow-xl uppercase tracking-widest text-sm">Pay <span x-text="'₱' + cartTotal"></span></button>
                     </div>
                 </div>
 
