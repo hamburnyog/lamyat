@@ -205,20 +205,38 @@
     <!-- Persistent Navbar -->
     <nav class="sticky top-0 z-50 bg-lamyat-cream/80 backdrop-blur-md border-b border-lamyat-gold/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
-            <button @click="mobileMenuOpen = true" class="p-2 md:hidden"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
-            <div class="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-widest">
+            <!-- Mobile Menu Toggle -->
+            <button @click="mobileMenuOpen = true" class="p-2 md:hidden">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+
+            <!-- Left Navigation (Desktop) -->
+            <div class="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-widest flex-1">
+                <a href="javascript:void(0)" @click.prevent="navigateTo('home')" class="hover:text-lamyat-gold transition-colors">Home</a>
+                <a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hover:text-lamyat-gold transition-colors">Products</a>
                 <a href="javascript:void(0)" @click.prevent="navigateTo('shop')" class="hover:text-lamyat-gold transition-colors">Shop</a>
-                <a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">Our Story</a>
             </div>
+
+            <!-- Centered Logo -->
             <a href="javascript:void(0)" @click.prevent="navigateTo('home')" class="block">
                 <img src="logo.png" alt="Lamyat" class="h-12 w-auto object-contain">
             </a>
-            <div class="flex items-center space-x-6">
-                <a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hidden md:block text-xs font-bold uppercase tracking-widest hover:text-lamyat-gold">Products</a>
-                <a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hidden md:block text-xs font-bold uppercase tracking-widest hover:text-lamyat-gold">Connect</a>
+
+            <!-- Right Navigation (Desktop) -->
+            <div class="hidden md:flex items-center justify-end space-x-8 text-xs font-bold uppercase tracking-widest flex-1">
+                <a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">Our Story</a>
+                <a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hover:text-lamyat-gold transition-colors">Connect</a>
                 <button @click="cartOpen = true" class="relative group">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:text-lamyat-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-2 -right-2 bg-lamyat-gold text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center"></span>
+                </button>
+            </div>
+
+            <!-- Mobile Cart Icon (Visible only on Mobile) -->
+            <div class="md:hidden flex items-center">
+                <button @click="cartOpen = true" class="relative group p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:text-lamyat-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    <span x-show="cartCount > 0" x-text="cartCount" class="absolute top-0 right-0 bg-lamyat-gold text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center"></span>
                 </button>
             </div>
         </div>
