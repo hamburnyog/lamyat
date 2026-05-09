@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamyat De Manila | The Ultimate Filipino Chew</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'lamyat-cream': '#FFFDF9',
+                        'lamyat-brown': '#2D241E',
+                        'lamyat-gold': '#D4A373',
+                        'lamyat-ube': '#6B3FA0',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    animation: {
+                        'marquee': 'marquee 25s linear infinite',
+                        'marquee-slow': 'marquee 40s linear infinite',
+                        'fade-in': 'fadeIn 0.8s ease-out forwards',
+                        'slow-zoom': 'slowZoom 20s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slowZoom: {
+                            '0%': { transform: 'scale(1)' },
+                            '100%': { transform: 'scale(1.1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-outline {
+                -webkit-text-stroke: 1px currentColor;
+                color: transparent;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .video-container video {
+                filter: brightness(0.7) contrast(1.1);
+            }
+            [x-cloak] { display: none !important; }
+        }
+    </style>
+</head>
+<body x-data="{ 
+        currentPage: 'home', 
+        mobileMenuOpen: false, 
+        cartOpen: false,
+        cart: [], 
+        showSuccess: false, 
+        subscribed: false,
+        activeProduct: null,
+        selectedQuantity: 1,
+        mainImg: '',
+        modalImg: null,
+        
+        products: [
+            { id: 1, name: 'The OG Ube Halaya', price: 145, desc: 'Vibrant purple ube halaya jam meets the sharp crunch of Mindanao heritage.', img: 'Ube Chewy.png', anatomy: ['Maguindanao Tinagtag', 'Pure Ube Halaya', 'Pillowy Marshmallow', 'Polvoron Dusting'] },
+            { id: 2, name: 'Pandan Paradise', price: 145, desc: 'Fragrant aromatic pandan combined with our signature crispy rice nest.', img: 'Pandan Chewy.png', anatomy: ['Maguindanao Tinagtag', 'Fresh Pandan Extract', 'Marshmallow', 'Coconut Polvoron'] },
+            { id: 3, name: 'Classic Tablea', price: 150, desc: 'Rich, bittersweet local Tablea chocolate for the ultimate Filipino chocolate fix.', img: 'Tablea Chewy.png', anatomy: ['Maguindanao Tinagtag', 'Artisanal Tablea', 'Marshmallow', 'Dark Cocoa Polvoron'] },
+            { id: 4, name: 'Nutty Peanut', price: 140, desc: 'Roasted peanuts paired with the golden crunch of Tinagtag.', img: 'Peanut Chewy.png', anatomy: ['Maguindanao Tinagtag', 'Roasted Peanuts', 'Marshmallow', 'Sweetened Polvoron'] }
+        ],
+        portions: [
+            { name: 'Solo Craving', count: 1, desc: 'For your me-time or merienda.' },
+            { name: 'Kasalo', count: 4, desc: 'Perfect for sharing over coffee.' },
+            { name: 'Handog', count: 8, desc: 'The ultimate gift or pasalubong.' }
+        ],
+        selectedPortion: 'Solo Craving',
+        checkoutStep: 1,
+        ribbonBox: false,
+        paymentMethod: 'gcash',
+        shipping: { fullName: '', phone: '', address: '', city: 'Metro Manila' },
+        
+        navigateTo(page, product = null) {
+            this.currentPage = page;
+            this.activeProduct = product;
+            this.mainImg = product ? product.img : '';
+            this.selectedQuantity = 1;
+            this.mobileMenuOpen = false;
+            this.cartOpen = false;
+            if(page === 'checkout') this.checkoutStep = 1;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        addToCart(product, portion) {
+            let price = product.price;
+            if(portion === 'Kasalo') price = product.price * 3.5;
+            if(portion === 'Handog') price = product.price * 6.5;
+            this.cart.push({ id: Date.now(), displayName: `${product.name} (${portion})`, finalPrice: Math.round(price), quantity: 1, img: product.img });
+            this.showSuccess = true;
+            setTimeout(() => this.showSuccess = false, 2000);
+        },
+        get cartTotal() {
+            let total = this.cart.reduce((t, i) => t + (i.finalPrice * i.quantity), 0);
+            if (this.ribbonBox) total += 100;
+            return total;
+        },
+        get cartCount() { return this.cart.reduce((t, i) => t + i.quantity, 0); },
+        removeItem(id) { this.cart = this.cart.filter(i => i.id !== id); }
+    }" 
+    class="bg-lamyat-cream text-lamyat-brown font-sans selection:bg-lamyat-gold selection:text-white antialiased">
+
+    <!-- Full Image Modal -->
+    <div x-show="modalImg" 
+         x-cloak
+         @click="modalImg = null"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[120] bg-lamyat-brown/90 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out">
+        <div class="relative max-w-5xl w-full h-full flex items-center justify-center">
+            <img :src="modalImg" class="max-w-full max-h-full object-contain rounded-3xl shadow-2xl transition-transform duration-500 transform hover:scale-105">
+            <button @click="modalImg = null" class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-4 rounded-full transition-colors">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Interactive Announcement Bar -->
+    <div x-data="{ 
+            messages: ['The Ultimate Filipino Chew is here!', 'Mindanao\'s Tinagtag meets Manila', 'Freshly Baked Daily in our Messy Kitchen', 'Free Delivery above ₱1,800'],
+            activeIdx: 0,
+            next() { this.activeIdx = (this.activeIdx + 1) % this.messages.length },
+            prev() { this.activeIdx = (this.activeIdx - 1 + this.messages.length) % this.messages.length }
+         }" 
+         class="bg-lamyat-brown text-lamyat-cream py-2 border-b border-lamyat-gold/20 relative group">
+        <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+            <button @click="prev()" class="p-1 hover:text-lamyat-gold transition-colors opacity-50 group-hover:opacity-100">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <div class="flex-grow text-center overflow-hidden h-5 relative">
+                <template x-for="(msg, index) in messages" :key="index">
+                    <div x-show="activeIdx === index" x-cloak
+                         x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0"
+                         x-transition:leave="transition ease-in duration-300 transform absolute inset-0" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-4"
+                         class="text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap" x-text="msg">
+                    </div>
+                </template>
+            </div>
+            <button @click="next()" class="p-1 hover:text-lamyat-gold transition-colors opacity-50 group-hover:opacity-100">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Persistent Navbar -->
+    <nav class="sticky top-0 z-50 bg-lamyat-cream/80 backdrop-blur-md border-b border-lamyat-gold/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
+            <button @click="mobileMenuOpen = true" class="p-2 md:hidden"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+            <div class="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-widest">
+                <a href="javascript:void(0)" @click.prevent="navigateTo('shop')" class="hover:text-lamyat-gold transition-colors">Shop</a>
+                <a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">Our Story</a>
+            </div>
+            <a href="javascript:void(0)" @click.prevent="navigateTo('home')" class="block">
+                <img src="logo.png" alt="Lamyat" class="h-12 w-auto object-contain">
+            </a>
+            <div class="flex items-center space-x-6">
+                <a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hidden md:block text-xs font-bold uppercase tracking-widest hover:text-lamyat-gold">Products</a>
+                <a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hidden md:block text-xs font-bold uppercase tracking-widest hover:text-lamyat-gold">Connect</a>
+                <button @click="cartOpen = true" class="relative group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:text-lamyat-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-2 -right-2 bg-lamyat-gold text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="min-h-screen">
+        <!-- HOME VIEW -->
+        <div x-show="currentPage === 'home'" x-cloak x-transition:enter="transition duration-1000" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+            <header class="relative h-screen flex items-center justify-center overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=2000&auto=format&fit=crop" 
+                     alt="Lamyat De Manila" 
+                     class="absolute inset-0 w-full h-full object-cover animate-slow-zoom">
+                <div class="absolute inset-0 bg-lamyat-brown/30 backdrop-blur-[1px]"></div>
+                <div class="relative z-10 text-center px-4">
+                    <h1 class="font-serif text-6xl md:text-[10rem] font-bold text-white mb-4 drop-shadow-2xl italic tracking-tighter opacity-0 animate-fade-in">Lamyat</h1>
+                    <p class="text-xl md:text-3xl text-lamyat-cream mb-12 font-medium tracking-widest drop-shadow-xl opacity-0 animate-fade-in" style="animation-delay: 0.4s">MINDANAO'S SOUL. MANILA'S CHEW.</p>
+                    <button @click="navigateTo('shop')" class="bg-white text-lamyat-brown px-12 py-5 text-sm font-black uppercase tracking-[0.3em] rounded-full hover:bg-lamyat-gold hover:text-white transition-all duration-500 hover:scale-105 active:scale-95 opacity-0 animate-fade-in" style="animation-delay: 0.8s">Shop Now</button>
+                </div>
+            </header>
+
+            <!-- Baking Process Cinematic -->
+            <section class="relative h-[70vh] flex items-center overflow-hidden">
+                <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover">
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-chef-preparing-dough-for-baking-41484-large.mp4" type="video/mp4">
+                </video>
+                <div class="absolute inset-0 bg-lamyat-brown/40"></div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div class="max-w-2xl">
+                        <span class="text-lamyat-gold font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Handcrafted Fresh</span>
+                        <h2 class="font-serif text-5xl md:text-7xl font-bold text-white italic leading-tight mb-8">From our oven, <br> to your heart.</h2>
+                        <p class="text-xl text-white/80 leading-relaxed font-medium">Every morning, we start by weaving the rice strands and preparing the Ube Halaya. No shortcuts—just the slow, beautiful process of artisanal baking.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- STORY VIEW -->
+        <div x-show="currentPage === 'story'" x-cloak x-transition:enter="transition duration-700" x-transition:enter-start="opacity-0 translate-y-10" x-transition:enter-end="opacity-100 translate-y-0">
+            <section class="max-w-4xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
+                <div class="text-center mb-20">
+                    <span class="text-lamyat-gold font-black uppercase tracking-[0.4em] text-[10px]">The Heritage</span>
+                    <h2 class="mt-4 font-serif text-5xl md:text-7xl font-bold italic leading-tight">From Mindanao with Love.</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-20 items-center mb-32">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=800&auto=format&fit=crop" class="rounded-[3rem] shadow-2xl rotate-2">
+                        <div class="absolute -bottom-6 -left-6 bg-lamyat-gold text-white p-8 rounded-3xl font-serif italic text-2xl">Traditional Tinagtag</div>
+                    </div>
+                    <div class="space-y-8">
+                        <p class="text-2xl font-serif italic text-lamyat-gold leading-relaxed">"We wanted to make Filipino snacks cool again."</p>
+                        <p class="text-lg text-lamyat-brown/70 leading-relaxed">It started with a simple question: How do we share the incredible, complex crunch of Mindanao's traditional **Tinagtag** with the world?</p>
+                        <p class="text-lg text-lamyat-brown/70 leading-relaxed">Every Lamyat you eat supports local artisans in Maguindanao who hand-weave the rice flour strands into the golden nests.</p>
+                    </div>
+                </div>
+                <div class="bg-lamyat-brown text-lamyat-cream p-16 rounded-[4rem] text-center shadow-2xl relative overflow-hidden">
+                    <h3 class="relative font-serif text-4xl font-bold mb-8 italic">Real People. Real Passion.</h3>
+                    <p class="relative text-xl text-lamyat-cream/80 max-w-2xl mx-auto leading-relaxed">We aren't a corporate giant. We're a team of dreamers, bakers, and storytellers.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- SHOP VIEW -->
+        <div x-show="currentPage === 'shop'" x-cloak x-transition:enter="transition duration-700" x-transition:enter-start="opacity-0 translate-y-10" x-transition:enter-end="opacity-100 translate-y-0" class="py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-20">
+                    <h2 class="font-serif text-6xl font-bold italic mb-4">Choose Your Craving</h2>
+                    <p class="text-lamyat-gold font-medium tracking-widest uppercase text-xs">Freshly prepared, beautifully presented.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <template x-for="product in products" :key="product.id">
+                        <div class="group cursor-pointer">
+                            <div class="relative aspect-[3/4] overflow-hidden rounded-[3rem] bg-white shadow-xl transition-all duration-700 group-hover:shadow-2xl">
+                                <img :src="product.img" :alt="product.name" @click="navigateTo('product', product)" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-gradient-to-t from-lamyat-brown/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 pointer-events-none"></div>
+                                <div class="absolute bottom-10 left-10 right-10 text-white pointer-events-none">
+                                    <h3 class="font-serif text-3xl font-bold italic mb-2" x-text="product.name"></h3>
+                                    <p class="text-xs font-black uppercase tracking-[0.2em]" x-text="'₱' + product.price + ' / piece'"></p>
+                                </div>
+                                <div class="absolute top-6 right-6 flex flex-col space-y-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button @click="addToCart(product, 'Solo Craving')" class="bg-white p-4 rounded-full shadow-2xl hover:bg-lamyat-gold hover:text-white transition-all"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
+                                    <button @click="navigateTo('product', product)" class="bg-white p-4 rounded-full shadow-2xl hover:bg-lamyat-brown hover:text-white transition-all"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCT VIEW -->
+        <div x-show="currentPage === 'product' && activeProduct" x-cloak x-transition:enter="transition duration-500" class="py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
+                    <div class="sticky top-32">
+                        <img :src="mainImg" @click="modalImg = mainImg" class="w-full aspect-square object-cover rounded-[4rem] shadow-2xl transition-all duration-500 cursor-zoom-in hover:scale-[1.02]">
+                        
+                        <!-- Product Variations (Interactive) -->
+                        <div class="mt-8 grid grid-cols-4 gap-4">
+                            <!-- Thumbnail 1 (Chewy) -->
+                            <div @click="mainImg = activeProduct.img" 
+                                 :class="mainImg === activeProduct.img ? 'border-lamyat-gold shadow-md' : 'border-transparent opacity-50'"
+                                 class="aspect-square rounded-2xl overflow-hidden border-2 cursor-pointer transition-all hover:opacity-100">
+                                <img :src="activeProduct?.img" class="w-full h-full object-cover">
+                            </div>
+                            <!-- Thumbnail 2 (Solo) -->
+                            <div @click="mainImg = activeProduct?.name.includes('Ube') ? 'Ube Solo.png' : activeProduct?.name.includes('Pandan') ? 'Pandan Solo.png' : activeProduct?.name.includes('Tablea') ? 'Tablea Solo.png' : 'Peanut solo.png'" 
+                                 :class="mainImg !== activeProduct.img ? 'border-lamyat-gold shadow-md' : 'border-transparent opacity-50'"
+                                 class="aspect-square rounded-2xl overflow-hidden border-2 cursor-pointer transition-all hover:opacity-100">
+                                <img :src="activeProduct?.name.includes('Ube') ? 'Ube Solo.png' : 
+                                           activeProduct?.name.includes('Pandan') ? 'Pandan Solo.png' : 
+                                           activeProduct?.name.includes('Tablea') ? 'Tablea Solo.png' : 
+                                           'Peanut solo.png'" 
+                                     class="w-full h-full object-cover">
+                            </div>
+                        </div>
+
+                        <!-- Anatomy Breakdown -->
+                        <div class="mt-12 bg-white p-10 rounded-[3rem] border-2 border-lamyat-gold/10">
+                            <h4 class="font-serif text-2xl font-bold italic mb-6 text-lamyat-gold">Anatomy of a Lamyat</h4>
+                            <ul class="space-y-4">
+                                <template x-for="layer in activeProduct?.anatomy">
+                                    <li class="flex items-center space-x-4"><span class="w-2 h-2 bg-lamyat-gold rounded-full"></span><span class="font-bold text-sm uppercase tracking-widest text-lamyat-brown/70" x-text="layer"></span></li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="space-y-12">
+                        <div>
+                            <h1 class="font-serif text-7xl font-bold italic mb-6" x-text="activeProduct?.name"></h1>
+                            <p class="text-xl text-lamyat-brown/60 leading-relaxed mb-8" x-text="activeProduct?.desc"></p>
+                        </div>
+                        <div class="space-y-6">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-lamyat-gold">Select Your Portion</label>
+                            <div class="grid grid-cols-1 gap-4">
+                                <template x-for="p in portions">
+                                    <button @click="selectedPortion = p.name" :class="selectedPortion === p.name ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl text-left flex justify-between items-center transition-all">
+                                        <div><span class="font-bold text-lg block" x-text="p.name"></span><span class="text-xs text-lamyat-brown/50" x-text="p.desc"></span></div>
+                                        <span class="font-black text-lamyat-gold" x-text="p.count > 1 ? `Box of ${p.count}` : '1 Piece'"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="bg-lamyat-ube/10 p-8 rounded-[2.5rem] flex items-center space-x-8 border border-lamyat-ube/20">
+                            <div class="text-4xl">🔥</div>
+                            <div><h4 class="font-black uppercase tracking-widest text-xs text-lamyat-ube mb-1">Lamyat Pro-Tip</h4><p class="text-sm font-medium text-lamyat-ube/80">Pop it in the microwave or air fryer for **30 seconds** for the ultimate experience.</p></div>
+                        </div>
+                        <button @click="addToCart(activeProduct, selectedPortion)" class="w-full bg-lamyat-brown text-white font-bold py-6 rounded-full hover:bg-lamyat-gold transition-all duration-500 shadow-2xl uppercase tracking-[0.3em] text-sm">Add to Tray</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTS INFO VIEW -->
+        <div x-show="currentPage === 'products-landing'" x-cloak x-transition:enter="transition duration-700" x-transition:enter-start="opacity-0 translate-y-10" x-transition:enter-end="opacity-100 translate-y-0" class="py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-20">
+                    <span class="text-lamyat-gold font-black uppercase tracking-[0.4em] text-[10px]">The Experience</span>
+                    <h2 class="mt-4 font-serif text-6xl md:text-8xl font-bold italic">The Anatomy of a Lamyat</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-32">
+                    <div class="relative group">
+                        <img src="Ube Chewy.png" class="w-full aspect-square object-cover rounded-[4rem] shadow-2xl transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 rounded-[4rem] border-8 border-lamyat-gold/10 pointer-events-none"></div>
+                    </div>
+                    
+                    <div class="space-y-12">
+                        <div class="space-y-8">
+                            <div class="flex items-start space-x-6">
+                                <div class="w-12 h-12 bg-lamyat-gold text-white rounded-full flex items-center justify-center font-black flex-shrink-0 text-sm">1</div>
+                                <div>
+                                    <h3 class="font-serif text-2xl font-bold italic text-lamyat-brown">Maguindanao Tinagtag</h3>
+                                    <p class="text-lamyat-brown/60 leading-relaxed text-sm">The heart of the Lamyat. Thousands of hand-woven rice flour strands creating a delicate, golden crunch that echoes Mindanao's soul.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-6">
+                                <div class="w-12 h-12 bg-lamyat-ube text-white rounded-full flex items-center justify-center font-black flex-shrink-0 text-sm">2</div>
+                                <div>
+                                    <h3 class="font-serif text-2xl font-bold italic text-lamyat-ube">Pure Ube Halaya</h3>
+                                    <p class="text-lamyat-brown/60 leading-relaxed text-sm">A thick layer of vibrant, locally-sourced ube jam. Creamy, earthy, and perfectly sweet.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-6">
+                                <div class="w-12 h-12 bg-lamyat-cream border-2 border-lamyat-gold text-lamyat-gold rounded-full flex items-center justify-center font-black flex-shrink-0 text-sm">3</div>
+                                <div>
+                                    <h3 class="font-serif text-2xl font-bold italic text-lamyat-brown">Pillowy Marshmallow</h3>
+                                    <p class="text-lamyat-brown/60 leading-relaxed text-sm">A soft, gooey envelope that binds the crunch and the jam into one harmonious chew.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-6">
+                                <div class="w-12 h-12 bg-lamyat-brown text-white rounded-full flex items-center justify-center font-black flex-shrink-0 text-sm">4</div>
+                                <div>
+                                    <h3 class="font-serif text-2xl font-bold italic text-lamyat-brown">Toasted Polvoron Dusting</h3>
+                                    <p class="text-lamyat-brown/60 leading-relaxed text-sm">The final touch. A buttery, crumbly dusting that adds a hint of nostalgic merienda flavor.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-lamyat-ube/10 p-10 rounded-[3rem] border-2 border-lamyat-ube/20 transform rotate-1">
+                            <div class="flex items-center space-x-6">
+                                <div class="text-5xl text-lamyat-ube animate-pulse">🔥</div>
+                                <div>
+                                    <h4 class="font-black uppercase tracking-widest text-[10px] text-lamyat-ube mb-2">Lamyat Pro-Tip</h4>
+                                    <p class="text-lg font-medium text-lamyat-ube/80 leading-relaxed italic">"Pop it in the microwave or air fryer for 30 seconds for that ultimate, gooey experience."</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button @click="navigateTo('shop')" class="w-full bg-lamyat-brown text-white font-bold py-6 rounded-full hover:bg-lamyat-gold transition-all duration-500 shadow-2xl uppercase tracking-[0.3em] text-xs">Select Your Cravings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTACT VIEW -->
+        <div x-show="currentPage === 'contact'" x-cloak x-transition:enter="transition duration-700" class="py-24">
+            <div class="max-w-3xl mx-auto px-4 text-center">
+                <h2 class="font-serif text-6xl font-bold italic mb-8 text-lamyat-gold">Let's talk, Kasalo!</h2>
+                <p class="text-xl text-lamyat-brown/70 leading-relaxed mb-12">Whether it's a question about our baking schedule or just a messy food photo, we're always here.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+                    <a href="https://tiktok.com" target="_blank" class="bg-white p-10 rounded-[3rem] shadow-xl hover:-translate-y-2 transition-all">
+                        <div class="text-4xl mb-4">🎬</div><h4 class="font-bold uppercase tracking-widest text-xs mb-2">Our Happy Kitchen</h4><p class="text-sm text-lamyat-brown/50">Follow our messy, happy journey on TikTok</p>
+                    </a>
+                    <div class="bg-lamyat-gold text-white p-10 rounded-[3rem] shadow-xl">
+                        <div class="text-4xl mb-4">📢</div><h4 class="font-bold uppercase tracking-widest text-xs mb-2">Baking Updates</h4><p class="text-sm opacity-80 italic">Currently baking OG & Ube batches! Next drop tomorrow 9AM.</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <p class="font-bold uppercase tracking-[0.2em] text-[10px] text-lamyat-gold">Reach out via</p>
+                    <a href="mailto:support@lamyatdemanilaph.shop" class="text-3xl font-serif italic border-b-2 border-lamyat-gold hover:text-lamyat-gold">support@lamyatdemanilaph.shop</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHECKOUT VIEW (Restored High-Fidelity Stepper) -->
+        <div x-show="currentPage === 'checkout'" x-cloak x-transition:enter="transition duration-500" class="py-24">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <!-- Progress Stepper Header -->
+                <div class="flex items-center justify-between mb-16 px-4">
+                    <div class="flex flex-col items-center">
+                        <div :class="checkoutStep >= 1 ? 'bg-lamyat-brown text-white' : 'bg-lamyat-brown/10'" class="w-10 h-10 rounded-full flex items-center justify-center font-bold mb-2 transition-colors">1</div>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Shipping</span>
+                    </div>
+                    <div class="flex-grow h-1 bg-lamyat-brown/10 mx-4 -mt-6">
+                        <div :class="checkoutStep >= 2 ? 'w-full' : 'w-0'" class="h-full bg-lamyat-gold transition-all duration-700"></div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div :class="checkoutStep >= 2 ? 'bg-lamyat-brown text-white' : 'bg-lamyat-brown/10'" class="w-10 h-10 rounded-full flex items-center justify-center font-bold mb-2 transition-colors">2</div>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Payment</span>
+                    </div>
+                    <div class="flex-grow h-1 bg-lamyat-brown/10 mx-4 -mt-6">
+                        <div :class="checkoutStep >= 3 ? 'w-full' : 'w-0'" class="h-full bg-lamyat-gold transition-all duration-700"></div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div :class="checkoutStep >= 3 ? 'bg-lamyat-brown text-white' : 'bg-lamyat-brown/10'" class="w-10 h-10 rounded-full flex items-center justify-center font-bold mb-2 transition-colors">3</div>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Success</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Shipping -->
+                <div x-show="checkoutStep === 1" class="space-y-12">
+                    <h2 class="font-serif text-4xl font-bold italic">Delivery Details</h2>
+                    <form @submit.prevent="checkoutStep = 2" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">Full Name</label>
+                            <input type="text" required x-model="shipping.fullName" placeholder="Juan Dela Cruz" class="w-full bg-white border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold focus:outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">Phone Number</label>
+                            <input type="tel" required x-model="shipping.phone" placeholder="0917 XXX XXXX" class="w-full bg-white border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold focus:outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">City</label>
+                            <select x-model="shipping.city" class="w-full bg-white border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold focus:outline-none appearance-none">
+                                <option>Metro Manila</option>
+                                <option>Cavite</option>
+                                <option>Laguna</option>
+                                <option>Rizal</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">Complete Address</label>
+                            <textarea required x-model="shipping.address" rows="3" placeholder="House No., Street, Brgy, Village..." class="w-full bg-white border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold focus:outline-none"></textarea>
+                        </div>
+                        <div class="md:col-span-2 bg-lamyat-gold/5 border-2 border-lamyat-gold/20 p-8 rounded-[2rem] flex items-center justify-between group cursor-pointer transition-all" @click="ribbonBox = !ribbonBox">
+                            <div class="flex items-center space-x-6">
+                                <div class="w-16 h-16 bg-lamyat-gold/20 rounded-2xl flex items-center justify-center text-3xl">🎀</div>
+                                <div><h3 class="font-bold text-lg">Premium Ribboned Box</h3><p class="text-sm text-lamyat-brown/60">Gift-ready packaging with silk ribbon</p></div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="font-black text-lamyat-gold">+₱100</span>
+                                <div :class="ribbonBox ? 'bg-lamyat-gold' : 'bg-white border-2 border-lamyat-brown/10'" class="w-6 h-6 rounded-full flex items-center justify-center transition-colors">
+                                    <svg x-show="ribbonBox" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-lamyat-brown text-lamyat-cream p-8 rounded-[2rem] shadow-xl">
+                            <div class="flex items-start space-x-4">
+                                <div class="text-2xl mt-1">🚚</div>
+                                <div class="space-y-3">
+                                    <h4 class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-gold">Delivery Reminders</h4>
+                                    <ul class="space-y-2 text-sm font-medium leading-relaxed opacity-90">
+                                        <li>• <span class="font-bold">On-demand delivery:</span> 1 to 3 hours within the city.</li>
+                                        <li>• <span class="font-bold">Standard delivery:</span> Next day delivery for orders placed past our daily cut-off time.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2 pt-8">
+                            <button type="submit" class="w-full bg-lamyat-brown text-white font-bold py-5 rounded-full hover:bg-lamyat-gold transition-all shadow-xl uppercase tracking-widest">Continue to Payment</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 2: Payment -->
+                <div x-show="checkoutStep === 2" x-cloak class="space-y-12">
+                    <h2 class="font-serif text-4xl font-bold italic">Payment Method</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button @click="paymentMethod = 'gcash'" :class="paymentMethod === 'gcash' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold">
+                            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-black">G</div><span class="font-bold uppercase tracking-widest text-xs">GCash</span>
+                        </button>
+                        <button @click="paymentMethod = 'maya'" :class="paymentMethod === 'maya' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold">
+                            <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center text-white font-black">M</div><span class="font-bold uppercase tracking-widest text-xs">Maya</span>
+                        </button>
+                        <button @click="paymentMethod = 'card'" :class="paymentMethod === 'card' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold">
+                            <div class="w-12 h-12 bg-lamyat-brown rounded-xl flex items-center justify-center text-white"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></div>
+                            <span class="font-bold uppercase tracking-widest text-xs">Card</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-lamyat-brown/5">
+                        <div x-show="paymentMethod !== 'card'" class="text-center py-6">
+                            <p class="text-sm text-lamyat-brown/60 mb-6">Redirecting to <span class="font-bold uppercase" x-text="paymentMethod"></span> for <span class="font-bold text-lamyat-brown" x-text="'₱' + cartTotal"></span>.</p>
+                            <div class="w-32 h-32 bg-lamyat-cream mx-auto rounded-3xl flex items-center justify-center mb-6"><svg class="h-16 w-16 text-lamyat-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg></div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-lamyat-gold">Scan QR to pay</p>
+                        </div>
+                        <div x-show="paymentMethod === 'card'" x-cloak class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">Card Number</label>
+                                <input type="text" placeholder="XXXX XXXX XXXX XXXX" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2"><label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">Expiry</label><input type="text" placeholder="MM/YY" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold outline-none"></div>
+                                <div class="space-y-2"><label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">CVC</label><input type="password" placeholder="***" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold outline-none"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-8 border-t border-lamyat-brown/10">
+                        <button @click="checkoutStep = 1" class="text-lamyat-brown/40 font-bold uppercase tracking-widest text-xs hover:text-lamyat-brown transition-colors">Back</button>
+                        <button @click="checkoutStep = 3; cart = []; cartOpen = false" class="bg-lamyat-brown text-white font-bold px-12 py-5 rounded-full hover:bg-lamyat-gold transition-all shadow-xl uppercase tracking-widest text-sm">Pay <span x-text="'₱' + cartTotal"></span></button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Success -->
+                <div x-show="checkoutStep === 3" x-cloak class="text-center space-y-8 py-12">
+                    <div class="w-24 h-24 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce"><svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></div>
+                    <h2 class="font-serif text-7xl font-bold italic text-lamyat-gold">Salamat!</h2>
+                    <p class="text-xl text-lamyat-brown/60">Your order is being baked right now. <br> A warm confirmation email is waiting in your inbox!</p>
+                    
+                    <!-- Email Animation Placeholder -->
+                    <div class="inline-block bg-white p-6 rounded-3xl border-2 border-lamyat-gold/10 shadow-sm">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-lamyat-gold/20 rounded-full flex items-center justify-center text-xl">📧</div>
+                            <div class="text-left">
+                                <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-gold">Next Step</p>
+                                <p class="text-sm font-bold">Check your email to confirm</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button @click="navigateTo('home')" class="bg-lamyat-brown text-white font-bold px-12 py-5 rounded-full uppercase tracking-widest text-xs">Back to Home</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cart Drawer -->
+    <div x-show="cartOpen" x-cloak class="fixed inset-0 z-[100] overflow-hidden">
+        <div class="absolute inset-0 bg-lamyat-brown/40 backdrop-blur-sm transition-opacity" @click="cartOpen = false" x-show="cartOpen" x-transition:enter="ease-in-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in-out duration-500" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+        <div class="fixed inset-y-0 right-0 max-w-md w-full bg-lamyat-cream shadow-2xl transition-transform" x-show="cartOpen" x-transition:enter="transform transition ease-in-out duration-500" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-500" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+            <div class="h-full flex flex-col bg-lamyat-cream">
+                <div class="px-8 py-10 border-b border-lamyat-gold/10 flex items-center justify-between"><h2 class="text-3xl font-serif font-bold italic">Your Tray</h2><button @click="cartOpen = false" class="p-2 text-lamyat-brown hover:text-lamyat-gold"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+                <div class="flex-grow overflow-y-auto px-8 py-8 no-scrollbar">
+                    <template x-if="cart.length === 0"><div class="text-center py-20"><p class="text-lamyat-brown/30 font-bold uppercase tracking-widest text-xs mb-8">Your tray is empty</p><button @click="navigateTo('shop')" class="text-lamyat-gold font-black border-b-2 border-lamyat-gold pb-1 text-[10px] uppercase tracking-[0.2em]">Start Your Journey</button></div></template>
+                    <div class="space-y-10"><template x-for="item in cart" :key="item.id"><div class="flex items-center space-x-6"><div class="w-24 h-24 rounded-[2rem] overflow-hidden bg-white shadow-sm flex-shrink-0"><img :src="item.img" class="w-full h-full object-cover"></div><div class="flex-grow"><div class="flex justify-between items-start"><h3 class="font-bold text-sm leading-tight mb-1" x-text="item.displayName"></h3><button @click="removeItem(item.id)" class="text-lamyat-brown/20 hover:text-red-500 transition-colors"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div><p class="text-lamyat-gold text-xs font-black" x-text="'₱' + item.finalPrice"></p><div class="mt-4 flex items-center justify-between"><div class="flex items-center border-2 border-lamyat-brown/5 rounded-full px-3 py-1 scale-90 -ml-2"><button @click="if(item.quantity > 1) item.quantity--" class="px-2 font-bold hover:text-lamyat-gold">-</button><span class="mx-2 text-xs font-black" x-text="item.quantity"></span><button @click="item.quantity++" class="px-2 font-bold hover:text-lamyat-gold">+</button></div><span class="text-xs font-black text-lamyat-brown/40" x-text="'₱' + (item.finalPrice * item.quantity)"></span></div></div></div></template></div>
+                </div>
+                <div x-show="cart.length > 0" class="p-8 border-t border-lamyat-gold/10 bg-white/50"><div class="flex justify-between items-center mb-8"><span class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-brown/40">Total Cravings</span><span class="text-3xl font-serif font-bold italic" x-text="'₱' + cartTotal"></span></div><button @click="navigateTo('checkout')" class="w-full bg-lamyat-brown text-white font-bold py-6 rounded-full hover:bg-lamyat-gold transition-all uppercase tracking-[0.3em] text-xs">Checkout</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Drawer -->
+    <div x-show="mobileMenuOpen" x-cloak class="fixed inset-0 z-[100] overflow-hidden">
+        <div class="absolute inset-0 bg-lamyat-brown/40 backdrop-blur-sm transition-opacity" @click="mobileMenuOpen = false" x-show="mobileMenuOpen" x-transition:enter="ease-in-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in-out duration-500" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+        <div class="fixed inset-y-0 left-0 max-w-xs w-full bg-lamyat-cream shadow-2xl transition-transform" x-show="mobileMenuOpen" x-transition:enter="transform transition ease-in-out duration-500" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-500" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
+            <div class="h-full flex flex-col py-10 px-8 bg-lamyat-cream">
+                <div class="flex items-center justify-between mb-16"><img src="logo.png" alt="Lamyat" class="h-10 w-auto object-contain"><button @click="mobileMenuOpen = false" class="p-2 text-lamyat-brown"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+                <div class="flex flex-col space-y-8 text-lg font-bold uppercase tracking-widest">
+                    <a href="javascript:void(0)" @click.prevent="navigateTo('home')" class="hover:text-lamyat-gold transition-colors">Home</a>
+                    <a href="javascript:void(0)" @click.prevent="navigateTo('shop')" class="hover:text-lamyat-gold transition-colors">Shop</a>
+                    <a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">Our Story</a>
+                    <a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hover:text-lamyat-gold transition-colors">Products</a>
+                    <a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hover:text-lamyat-gold transition-colors">Connect</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div x-show="showSuccess" x-cloak x-transition class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[110] bg-lamyat-brown text-white px-10 py-5 rounded-full shadow-2xl font-bold flex items-center space-x-3 pointer-events-none"><span>Added to your tray! 🍪</span></div>
+
+    <!-- Footer -->
+    <footer class="bg-lamyat-brown text-lamyat-cream py-24 mt-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-20 text-center md:text-left">
+                <div class="lg:col-span-2 space-y-8"><img src="logo.png" class="h-12 w-auto mx-auto md:mx-0"><p class="text-xl font-serif italic text-lamyat-cream/60 max-w-sm mx-auto md:mx-0 leading-relaxed">"Mindanao's soul, Manila's chew. Handcrafted heritage in every bite."</p></div>
+                <div class="space-y-10">
+                    <h4 class="font-black uppercase tracking-[0.3em] text-lamyat-gold text-[10px]">Explore</h4>
+                    <ul class="space-y-5 text-xs font-bold uppercase tracking-widest">
+                        <li><a href="javascript:void(0)" @click.prevent="navigateTo('shop')" class="hover:text-lamyat-gold transition-colors">Shop Cravings</a></li>
+                        <li><a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">The Heritage</a></li>
+                        <li><a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hover:text-lamyat-gold transition-colors">Products</a></li>
+                        <li><a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hover:text-lamyat-gold transition-colors">Connect</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-10"><h4 class="font-black uppercase tracking-[0.3em] text-lamyat-gold text-[10px]">Community</h4><div class="flex justify-center md:justify-start space-x-6"><a href="https://tiktok.com" target="_blank" class="bg-white/5 p-5 rounded-2xl hover:bg-lamyat-gold transition-all"><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.86-.6-4.12-1.31a6.417 6.417 0 01-1.87-1.54v6.24c-.03 2.12-.83 4.23-2.31 5.76-1.49 1.53-3.63 2.44-5.74 2.44-2.12 0-4.26-.91-5.74-2.44-1.48-1.53-2.28-3.64-2.31-5.76.03-2.12.83-4.23 2.31-5.76 1.48-1.53 3.62-2.44 5.74-2.44 1.23 0 2.44.3 3.52.89v4.05c-1.07-.6-2.3-.89-3.52-.89-1.2 0-2.42.52-3.27 1.4-1.12 1.15-1.44 3.03-1.14 4.54.3 1.51 1.4 2.82 2.8 3.32.74.26 1.53.37 2.31.33.78.04 1.57-.07 2.31-.33 1.4-.5 2.5-1.81 2.8-3.32.3-1.51-.02-3.39-1.14-4.54-.2-.21-.43-.41-.67-.59V.02z"/></svg></a><a href="https://instagram.com" target="_blank" class="bg-white/5 p-5 rounded-2xl hover:bg-lamyat-gold transition-all"><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div>
+            </div>
+            <div class="mt-20 pt-10 border-t border-lamyat-cream/10 text-center md:text-left"><p class="text-[10px] font-black uppercase tracking-[0.4em] text-lamyat-cream/30">© 2026 Lamyat De Manila. Handcrafted Heritage.</p></div>
+        </div>
+    </footer>
+</body>
+</html>
