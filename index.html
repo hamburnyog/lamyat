@@ -201,9 +201,9 @@
         <!-- HOME VIEW -->
         <div x-show="currentPage === 'home'" x-cloak x-transition:enter="transition duration-1000" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
             <header class="relative h-screen flex items-center justify-center overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=2000&auto=format&fit=crop" 
+                <img src="lamyat.gif" 
                      alt="Lamyat De Manila" 
-                     class="absolute inset-0 w-full h-full object-cover animate-slow-zoom">
+                     class="absolute inset-0 w-full h-full object-cover">
                 <div class="absolute inset-0 bg-lamyat-brown/30 backdrop-blur-[1px]"></div>
                 <div class="relative z-10 text-center px-4">
                     <h1 class="font-serif text-6xl md:text-[10rem] font-bold text-white mb-4 drop-shadow-2xl italic tracking-tighter opacity-0 animate-fade-in">Lamyat</h1>
@@ -211,21 +211,6 @@
                     <button @click="navigateTo('shop')" class="bg-white text-lamyat-brown px-12 py-5 text-sm font-black uppercase tracking-[0.3em] rounded-full hover:bg-lamyat-gold hover:text-white transition-all duration-500 hover:scale-105 active:scale-95 opacity-0 animate-fade-in" style="animation-delay: 0.8s">Shop Now</button>
                 </div>
             </header>
-
-            <!-- Baking Process Cinematic -->
-            <section class="relative h-[70vh] flex items-center overflow-hidden">
-                <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover">
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-chef-preparing-dough-for-baking-41484-large.mp4" type="video/mp4">
-                </video>
-                <div class="absolute inset-0 bg-lamyat-brown/40"></div>
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div class="max-w-2xl">
-                        <span class="text-lamyat-gold font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Handcrafted Fresh</span>
-                        <h2 class="font-serif text-5xl md:text-7xl font-bold text-white italic leading-tight mb-8">From our oven, <br> to your heart.</h2>
-                        <p class="text-xl text-white/80 leading-relaxed font-medium">Every morning, we start by weaving the rice strands and preparing the Ube Halaya. No shortcuts—just the slow, beautiful process of artisanal baking.</p>
-                    </div>
-                </div>
-            </section>
         </div>
 
         <!-- STORY VIEW -->
@@ -353,9 +338,21 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-32">
-                    <div class="relative group">
-                        <img src="Ube Chewy.png" class="w-full aspect-square object-cover rounded-[4rem] shadow-2xl transition-transform duration-700 group-hover:scale-105">
-                        <div class="absolute inset-0 rounded-[4rem] border-8 border-lamyat-gold/10 pointer-events-none"></div>
+                    <!-- Product Collage -->
+                    <div class="grid grid-cols-2 gap-4 relative group">
+                        <div class="aspect-square overflow-hidden rounded-[2rem] shadow-xl">
+                            <img src="Ube Solo.png" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+                        </div>
+                        <div class="aspect-square overflow-hidden rounded-[2rem] shadow-xl">
+                            <img src="Pandan Solo.png" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+                        </div>
+                        <div class="aspect-square overflow-hidden rounded-[2rem] shadow-xl">
+                            <img src="Tablea Solo.png" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+                        </div>
+                        <div class="aspect-square overflow-hidden rounded-[2rem] shadow-xl">
+                            <img src="Peanut solo.png" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+                        </div>
+                        <div class="absolute inset-0 rounded-[3rem] border-8 border-lamyat-gold/5 pointer-events-none -m-4"></div>
                     </div>
                     
                     <div class="space-y-12">
@@ -489,12 +486,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="md:col-span-2 bg-lamyat-brown text-lamyat-cream p-8 rounded-[2rem] shadow-xl">
+                        <div class="md:col-span-2 bg-lamyat-gold/5 border-2 border-lamyat-gold/20 p-8 rounded-[2rem]">
                             <div class="flex items-start space-x-4">
                                 <div class="text-2xl mt-1">🚚</div>
                                 <div class="space-y-3">
                                     <h4 class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-gold">Delivery Reminders</h4>
-                                    <ul class="space-y-2 text-sm font-medium leading-relaxed opacity-90">
+                                    <ul class="space-y-2 text-sm font-medium leading-relaxed text-lamyat-brown/80">
                                         <li>• <span class="font-bold">On-demand delivery:</span> 1 to 3 hours within the city.</li>
                                         <li>• <span class="font-bold">Standard delivery:</span> Next day delivery for orders placed past our daily cut-off time.</li>
                                     </ul>
@@ -509,7 +506,17 @@
 
                 <!-- Step 2: Payment -->
                 <div x-show="checkoutStep === 2" x-cloak class="space-y-12">
-                    <h2 class="font-serif text-4xl font-bold italic">Payment Method</h2>
+                    <div class="flex items-center justify-between bg-white p-8 rounded-[2rem] border-2 border-lamyat-brown/5 shadow-sm">
+                        <div>
+                            <h2 class="font-serif text-4xl font-bold italic">Payment</h2>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40 mt-1">Select your preferred method</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-gold mb-1">Total to Pay</p>
+                            <p class="text-4xl font-serif font-bold italic text-lamyat-brown" x-text="'₱' + cartTotal"></p>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <button @click="paymentMethod = 'gcash'" :class="paymentMethod === 'gcash' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold">
                             <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-black">G</div><span class="font-bold uppercase tracking-widest text-xs">GCash</span>
