@@ -264,15 +264,15 @@
                     <template x-for="product in products" :key="product.id">
                         <div class="group cursor-pointer">
                             <div class="relative aspect-[3/4] overflow-hidden rounded-[3rem] bg-white shadow-xl transition-all duration-700 group-hover:shadow-2xl">
-                                <img :src="product.img" :alt="product.name" @click="navigateTo('product', product)" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
-                                <div class="absolute inset-0 bg-gradient-to-t from-lamyat-brown/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 pointer-events-none"></div>
-                                <div class="absolute bottom-10 left-10 right-10 text-white pointer-events-none">
+                                <img :src="product.img" :alt="product.name" @click="modalImg = product.img" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 cursor-zoom-in">
+                                <div @click="navigateTo('product', product)" class="absolute inset-0 bg-gradient-to-t from-lamyat-brown/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                                <div @click="navigateTo('product', product)" class="absolute bottom-10 left-10 right-10 text-white">
                                     <h3 class="font-serif text-3xl font-bold italic mb-2" x-text="product.name"></h3>
                                     <p class="text-xs font-black uppercase tracking-[0.2em]" x-text="'₱' + product.price + ' / piece'"></p>
                                 </div>
                                 <div class="absolute top-6 right-6 flex flex-col space-y-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button @click="addToCart(product, 'Solo Craving')" class="bg-white p-4 rounded-full shadow-2xl hover:bg-lamyat-gold hover:text-white transition-all"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></button>
-                                    <button @click="navigateTo('product', product)" class="bg-white p-4 rounded-full shadow-2xl hover:bg-lamyat-brown hover:text-white transition-all"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+                                    <button @click="navigateTo('product', product)" class="bg-white p-4 rounded-full shadow-2xl hover:bg-lamyat-brown hover:text-white transition-all"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
                                 </div>
                             </div>
                         </div>
@@ -501,7 +501,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="md:col-span-2 pt-8">
                             <button type="submit" class="w-full bg-lamyat-brown text-white font-bold py-5 rounded-full hover:bg-lamyat-gold transition-all shadow-xl uppercase tracking-widest">Continue to Payment</button>
                         </div>
@@ -553,8 +552,6 @@
                     <div class="w-24 h-24 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce"><svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></div>
                     <h2 class="font-serif text-7xl font-bold italic text-lamyat-gold">Salamat!</h2>
                     <p class="text-xl text-lamyat-brown/60">Your order is being baked right now. <br> A warm confirmation email is waiting in your inbox!</p>
-                    
-                    <!-- Email Animation Placeholder -->
                     <div class="inline-block bg-white p-6 rounded-3xl border-2 border-lamyat-gold/10 shadow-sm">
                         <div class="flex items-center space-x-4">
                             <div class="w-10 h-10 bg-lamyat-gold/20 rounded-full flex items-center justify-center text-xl">📧</div>
@@ -564,7 +561,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="pt-4">
                         <button @click="navigateTo('home')" class="bg-lamyat-brown text-white font-bold px-12 py-5 rounded-full uppercase tracking-widest text-xs">Back to Home</button>
                     </div>
@@ -594,13 +590,7 @@
         <div class="fixed inset-y-0 left-0 max-w-xs w-full bg-lamyat-cream shadow-2xl transition-transform" x-show="mobileMenuOpen" x-transition:enter="transform transition ease-in-out duration-500" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-500" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
             <div class="h-full flex flex-col py-10 px-8 bg-lamyat-cream">
                 <div class="flex items-center justify-between mb-16"><img src="logo.png" alt="Lamyat" class="h-10 w-auto object-contain"><button @click="mobileMenuOpen = false" class="p-2 text-lamyat-brown"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
-                <div class="flex flex-col space-y-8 text-lg font-bold uppercase tracking-widest">
-                    <a href="javascript:void(0)" @click.prevent="navigateTo('home')" class="hover:text-lamyat-gold transition-colors">Home</a>
-                    <a href="javascript:void(0)" @click.prevent="navigateTo('shop')" class="hover:text-lamyat-gold transition-colors">Shop</a>
-                    <a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">Our Story</a>
-                    <a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hover:text-lamyat-gold transition-colors">Products</a>
-                    <a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hover:text-lamyat-gold transition-colors">Connect</a>
-                </div>
+                <div class="flex flex-col space-y-8 text-lg font-bold uppercase tracking-widest"><a href="javascript:void(0)" @click.prevent="navigateTo('home')" class="hover:text-lamyat-gold transition-colors">Home</a><a href="javascript:void(0)" @click.prevent="navigateTo('shop')" class="hover:text-lamyat-gold transition-colors">Shop</a><a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">Our Story</a><a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hover:text-lamyat-gold transition-colors">Products</a><a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hover:text-lamyat-gold transition-colors">Connect</a></div>
             </div>
         </div>
     </div>
@@ -613,15 +603,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-20 text-center md:text-left">
                 <div class="lg:col-span-2 space-y-8"><img src="logo.png" class="h-12 w-auto mx-auto md:mx-0"><p class="text-xl font-serif italic text-lamyat-cream/60 max-w-sm mx-auto md:mx-0 leading-relaxed">"Mindanao's soul, Manila's chew. Handcrafted heritage in every bite."</p></div>
-                <div class="space-y-10">
-                    <h4 class="font-black uppercase tracking-[0.3em] text-lamyat-gold text-[10px]">Explore</h4>
-                    <ul class="space-y-5 text-xs font-bold uppercase tracking-widest">
-                        <li><a href="javascript:void(0)" @click.prevent="navigateTo('shop')" class="hover:text-lamyat-gold transition-colors">Shop Cravings</a></li>
-                        <li><a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">The Heritage</a></li>
-                        <li><a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hover:text-lamyat-gold transition-colors">Products</a></li>
-                        <li><a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hover:text-lamyat-gold transition-colors">Connect</a></li>
-                    </ul>
-                </div>
+                <div class="space-y-10"><h4 class="font-black uppercase tracking-[0.3em] text-lamyat-gold text-[10px]">Explore</h4><ul class="space-y-5 text-xs font-bold uppercase tracking-widest"><li><a href="javascript:void(0)" @click.prevent="navigateTo('shop')" class="hover:text-lamyat-gold transition-colors">Shop Cravings</a></li><li><a href="javascript:void(0)" @click.prevent="navigateTo('story')" class="hover:text-lamyat-gold transition-colors">The Heritage</a></li><li><a href="javascript:void(0)" @click.prevent="navigateTo('products-landing')" class="hover:text-lamyat-gold transition-colors">Products</a></li><li><a href="javascript:void(0)" @click.prevent="navigateTo('contact')" class="hover:text-lamyat-gold transition-colors">Connect</a></li></ul></div>
                 <div class="space-y-10"><h4 class="font-black uppercase tracking-[0.3em] text-lamyat-gold text-[10px]">Community</h4><div class="flex justify-center md:justify-start space-x-6"><a href="https://tiktok.com" target="_blank" class="bg-white/5 p-5 rounded-2xl hover:bg-lamyat-gold transition-all"><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.86-.6-4.12-1.31a6.417 6.417 0 01-1.87-1.54v6.24c-.03 2.12-.83 4.23-2.31 5.76-1.49 1.53-3.63 2.44-5.74 2.44-2.12 0-4.26-.91-5.74-2.44-1.48-1.53-2.28-3.64-2.31-5.76.03-2.12.83-4.23 2.31-5.76 1.48-1.53 3.62-2.44 5.74-2.44 1.23 0 2.44.3 3.52.89v4.05c-1.07-.6-2.3-.89-3.52-.89-1.2 0-2.42.52-3.27 1.4-1.12 1.15-1.44 3.03-1.14 4.54.3 1.51 1.4 2.82 2.8 3.32.74.26 1.53.37 2.31.33.78.04 1.57-.07 2.31-.33 1.4-.5 2.5-1.81 2.8-3.32.3-1.51-.02-3.39-1.14-4.54-.2-.21-.43-.41-.67-.59V.02z"/></svg></a><a href="https://instagram.com" target="_blank" class="bg-white/5 p-5 rounded-2xl hover:bg-lamyat-gold transition-all"><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div>
             </div>
             <div class="mt-20 pt-10 border-t border-lamyat-cream/10 text-center md:text-left"><p class="text-[10px] font-black uppercase tracking-[0.4em] text-lamyat-cream/30">© 2026 Lamyat De Manila. Handcrafted Heritage.</p></div>
