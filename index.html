@@ -176,10 +176,10 @@
             return total;
         },
         get cartCount() { return this.cart.reduce((t, i) => t + i.quantity, 0); },
-        removeItem(id) { 
-            this.cart = this.cart.filter(i => i.id !== id); 
+        removeItem(id) {
+            this.cart = this.cart.filter(i => i.id !== id);
             if (this.currentPage === 'checkout' && this.cart.length === 0) {
-                alert("Your tray is empty. Returning to home.");
+                alert('Your tray is empty. Returning to home.');
                 this.navigateTo('home');
             }
         },
