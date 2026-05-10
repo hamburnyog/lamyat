@@ -103,54 +103,64 @@
         isProcessing: false,
         
         init() {
-            // Check initial hash for deep linking
-            const hash = window.location.hash.replace('#', '');
-            const validPages = ['home', 'shop', 'story', 'products-landing', 'contact', 'checkout'];
-            if (hash && validPages.includes(hash)) {
-                this.currentPage = hash;
-            }
-
-            window.addEventListener('popstate', (e) => {
-                // If a full-screen image is open, close it and stay on page
-                if (this.modalImg) {
+            const handleRouting = () => {
+                if (this.modalImg && !window.location.hash.includes('modal')) {
                     this.modalImg = null;
-                    return;
                 }
 
-                if (e.state && e.state.page) {
-                    this.currentPage = e.state.page;
-                    this.activeProduct = e.state.product;
-                    this.mainImg = e.state.product ? e.state.product.img : '';
+                const hash = window.location.hash.replace('#', '');
+                
+                // Set the page state
+                if (hash.startsWith('product/')) {
+                    const id = hash.split('/')[1];
+                    const product = this.products.find(p => p.id == id);
+                    if (product) {
+                        this.currentPage = 'product';
+                        this.activeProduct = product;
+                        this.mainImg = product.img;
+                    }
                 } else {
-                    this.currentPage = 'home';
+                    const validPages = ['home', 'shop', 'story', 'products-landing', 'contact', 'checkout'];
+                    this.currentPage = validPages.includes(hash) ? hash : 'home';
                     this.activeProduct = null;
                 }
-            });
+
+                // UI Cleanup
+                this.mobileMenuOpen = false;
+                this.cartOpen = false;
+
+                // Robust Scroll to Top
+                // We use a small delay to ensure the browser has recalculated the page height 
+                // after the new content is shown/old content is hidden.
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    // Double check for mobile browsers that might lag
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                }, 50);
+            };
+
+            window.addEventListener('hashchange', handleRouting);
             
-            // Sync current state with history
-            history.replaceState({ page: this.currentPage, product: this.activeProduct }, '', window.location.hash);
+            if (!window.location.hash) {
+                window.location.hash = 'home';
+            } else {
+                handleRouting();
+            }
         },
 
-        navigateTo(page, product = null, push = true) {
-            this.currentPage = page;
-            this.activeProduct = product;
-            this.mainImg = product ? product.img : '';
-            this.selectedQuantity = 1;
-            this.mobileMenuOpen = false;
-            this.cartOpen = false;
-            
-            if(page === 'checkout') this.checkoutStep = 1;
-            
-            if (push) {
-                history.pushState({ page, product }, '', '#' + page);
+        navigateTo(page, product = null) {
+            if (product) {
+                window.location.hash = `product/${product.id}`;
+            } else {
+                window.location.hash = page;
             }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
 
         openModal(img) {
             this.modalImg = img;
-            // Push a state so the back button closes the modal instead of changing the page
-            history.pushState({ page: this.currentPage, product: this.activeProduct, isModal: true }, '', window.location.hash);
+            // We don't push hash for modals in this simplified version to avoid routing conflicts,
+            // but we keep the UI responsive.
         },
         addToCart(product, portion) {
             let price = product.price;
