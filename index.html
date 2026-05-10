@@ -619,16 +619,10 @@
                 </div>
 
                 <!-- Step 2: Payment -->
-                <div x-show="checkoutStep === 2" x-cloak class="space-y-12">
-                    <div class="flex items-center justify-between bg-white p-8 rounded-[2rem] border-2 border-lamyat-brown/5 shadow-sm">
-                        <div>
-                            <h2 class="font-serif text-4xl font-bold italic">Payment</h2>
-                            <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40 mt-1">Select your preferred method</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-gold mb-1">Total to Pay</p>
-                            <p class="text-4xl font-serif font-bold italic text-lamyat-brown" x-text="'₱' + cartTotal"></p>
-                        </div>
+                <div x-show="checkoutStep === 2" x-cloak class="space-y-10">
+                    <div>
+                        <h2 class="font-serif text-4xl font-bold italic">Payment</h2>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40 mt-1">Select your method and review your tray</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -648,33 +642,41 @@
                         </button>
                     </div>
 
-                    <!-- Itemized Order Summary -->
-                    <div class="bg-white p-8 rounded-[2rem] border-2 border-lamyat-brown/5 space-y-6">
-                        <h3 class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-gold">Order Summary</h3>
-                        <div class="divide-y divide-lamyat-brown/5">
-                            <template x-for="item in cart" :key="item.id">
-                                <div class="py-4 flex justify-between items-center">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 rounded-xl overflow-hidden bg-lamyat-cream flex-shrink-0">
-                                            <img :src="item.img" class="w-full h-full object-cover">
+                    <!-- Unified Order Summary & Total -->
+                    <div class="bg-white rounded-[2rem] border-2 border-lamyat-brown/5 overflow-hidden shadow-sm">
+                        <div class="p-8 space-y-6">
+                            <h3 class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-gold">Order Summary</h3>
+                            <div class="divide-y divide-lamyat-brown/5">
+                                <template x-for="item in cart" :key="item.id">
+                                    <div class="py-4 flex justify-between items-center">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-12 h-12 rounded-xl overflow-hidden bg-lamyat-cream flex-shrink-0">
+                                                <img :src="item.img" class="w-full h-full object-cover">
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-sm" x-text="item.displayName"></p>
+                                                <p class="text-[10px] text-lamyat-brown/40 font-bold uppercase tracking-widest" x-text="'Qty: ' + item.quantity + ' • ₱' + item.finalPrice"></p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p class="font-bold text-sm" x-text="item.displayName"></p>
-                                            <p class="text-[10px] text-lamyat-brown/40 font-bold uppercase tracking-widest" x-text="'Qty: ' + item.quantity + ' • ₱' + item.finalPrice"></p>
-                                        </div>
+                                        <span class="font-bold text-sm" x-text="'₱' + (item.finalPrice * item.quantity)"></span>
                                     </div>
-                                    <span class="font-bold text-sm" x-text="'₱' + (item.finalPrice * item.quantity)"></span>
+                                </template>
+                                
+                                <!-- Ribbon Box Add-on -->
+                                <div x-show="ribbonBox" class="py-4 flex justify-between items-center text-lamyat-gold">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 rounded-xl bg-lamyat-gold/10 flex items-center justify-center text-xl">🎀</div>
+                                        <p class="font-bold text-sm">Premium Ribboned Box</p>
+                                    </div>
+                                    <span class="font-bold text-sm">+₱100</span>
                                 </div>
-                            </template>
-                            
-                            <!-- Ribbon Box Add-on -->
-                            <div x-show="ribbonBox" class="py-4 flex justify-between items-center text-lamyat-gold">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 rounded-xl bg-lamyat-gold/10 flex items-center justify-center text-xl">🎀</div>
-                                    <p class="font-bold text-sm">Premium Ribboned Box</p>
-                                </div>
-                                <span class="font-bold text-sm">+₱100</span>
                             </div>
+                        </div>
+                        
+                        <!-- Total Row -->
+                        <div class="bg-lamyat-cream/50 p-8 border-t-2 border-lamyat-brown/5 flex justify-between items-center">
+                            <span class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-brown/40">Total to Pay</span>
+                            <span class="text-4xl font-serif font-bold italic text-lamyat-brown" x-text="'₱' + cartTotal"></span>
                         </div>
                     </div>
 
