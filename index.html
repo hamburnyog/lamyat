@@ -176,7 +176,20 @@
             return total;
         },
         get cartCount() { return this.cart.reduce((t, i) => t + i.quantity, 0); },
-        removeItem(id) { this.cart = this.cart.filter(i => i.id !== id); },
+        removeItem(id) { 
+            this.cart = this.cart.filter(i => i.id !== id); 
+            if (this.currentPage === 'checkout' && this.cart.length === 0) {
+                alert("Your tray is empty. Returning to home.");
+                this.navigateTo('home');
+            }
+        },
+        updateQty(id, delta) {
+            const item = this.cart.find(i => i.id === id);
+            if (item) {
+                const newQty = item.quantity + delta;
+                if (newQty >= 1) item.quantity = newQty;
+            }
+        },
         processPayment() {
             this.isProcessing = true;
             setTimeout(() => {
@@ -655,13 +668,20 @@
                                             </div>
                                             <div>
                                                 <p class="font-bold text-sm" x-text="item.displayName"></p>
-                                                <p class="text-[10px] text-lamyat-brown/40 font-bold uppercase tracking-widest" x-text="'Qty: ' + item.quantity + ' • ₱' + item.finalPrice"></p>
+                                                <!-- Qty & Remove controls -->
+                                                <div class="mt-2 flex items-center space-x-3">
+                                                    <div class="flex items-center border border-lamyat-brown/10 rounded-full px-2 py-0.5">
+                                                        <button @click="updateQty(item.id, -1)" class="px-1 text-xs font-black hover:text-lamyat-gold focus:outline-none">-</button>
+                                                        <span class="mx-2 text-[10px] font-black" x-text="item.quantity"></span>
+                                                        <button @click="updateQty(item.id, 1)" class="px-1 text-xs font-black hover:text-lamyat-gold focus:outline-none">+</button>
+                                                    </div>
+                                                    <button @click="removeItem(item.id)" class="text-[9px] font-black uppercase text-red-500/40 hover:text-red-500 transition-colors">Remove</button>
+                                                </div>
                                             </div>
                                         </div>
                                         <span class="font-bold text-sm" x-text="'₱' + (item.finalPrice * item.quantity)"></span>
                                     </div>
-                                </template>
-                                
+                                </template>                                
                                 <!-- Ribbon Box Add-on -->
                                 <div x-show="ribbonBox" class="py-4 flex justify-between items-center text-lamyat-gold">
                                     <div class="flex items-center space-x-4">
