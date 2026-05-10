@@ -662,26 +662,26 @@
                             <div class="divide-y divide-lamyat-brown/5">
                                 <template x-for="item in cart" :key="item.id">
                                     <div class="py-4 flex justify-between items-center">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="w-12 h-12 rounded-xl overflow-hidden bg-lamyat-cream flex-shrink-0">
-                                                <img :src="item.img" class="w-full h-full object-cover">
-                                            </div>
-                                            <div>
-                                                <p class="font-bold text-sm" x-text="item.displayName"></p>
-                                                <!-- Qty & Remove controls -->
-                                                <div class="mt-2 flex items-center space-x-3">
-                                                    <div class="flex items-center border border-lamyat-brown/10 rounded-full px-2 py-0.5">
-                                                        <button @click="updateQty(item.id, -1)" class="px-1 text-xs font-black hover:text-lamyat-gold focus:outline-none">-</button>
-                                                        <span class="mx-2 text-[10px] font-black" x-text="item.quantity"></span>
-                                                        <button @click="updateQty(item.id, 1)" class="px-1 text-xs font-black hover:text-lamyat-gold focus:outline-none">+</button>
-                                                    </div>
-                                                    <button @click="removeItem(item.id)" class="text-[9px] font-black uppercase text-red-500/40 hover:text-red-500 transition-colors">Remove</button>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 rounded-xl overflow-hidden bg-lamyat-cream flex-shrink-0">
+                                            <img :src="item.img" class="w-full h-full object-cover">
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-sm" x-text="item.displayName"></p>
+                                            <!-- Qty & Remove controls -->
+                                            <div class="mt-2 flex items-center space-x-3">
+                                                <div class="flex items-center border border-lamyat-brown/10 rounded-full px-2 py-0.5">
+                                                    <button @click="updateQty(item.id, -1)" class="px-1 text-xs font-black hover:text-lamyat-gold focus:outline-none">-</button>
+                                                    <span class="mx-2 text-[10px] font-black" x-text="item.quantity"></span>
+                                                    <button @click="updateQty(item.id, 1)" class="px-1 text-xs font-black hover:text-lamyat-gold focus:outline-none">+</button>
                                                 </div>
+                                                <button @click="removeItem(item.id)" class="text-[9px] font-black uppercase text-red-500/40 hover:text-red-500 transition-colors">Remove</button>
                                             </div>
                                         </div>
-                                        <span class="font-bold text-sm" x-text="'₱' + (item.finalPrice * item.quantity)"></span>
                                     </div>
-                                    </template>                        
+                                    <span class="font-bold text-sm" x-text="'₱' + (item.finalPrice * item.quantity)"></span>
+                                </div>
+                            </template>                        
                         <!-- Total Row -->
                         <div class="bg-lamyat-cream/50 p-8 border-t-2 border-lamyat-brown/5 flex justify-between items-center">
                             <span class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-brown/40">Total to Pay</span>
