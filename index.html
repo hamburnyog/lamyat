@@ -103,7 +103,20 @@
         isProcessing: false,
         
         init() {
+            // Check initial hash for deep linking
+            const hash = window.location.hash.replace('#', '');
+            const validPages = ['home', 'shop', 'story', 'products-landing', 'contact', 'checkout'];
+            if (hash && validPages.includes(hash)) {
+                this.currentPage = hash;
+            }
+
             window.addEventListener('popstate', (e) => {
+                // If a full-screen image is open, close it and stay on page
+                if (this.modalImg) {
+                    this.modalImg = null;
+                    return;
+                }
+
                 if (e.state && e.state.page) {
                     this.currentPage = e.state.page;
                     this.activeProduct = e.state.product;
@@ -113,7 +126,9 @@
                     this.activeProduct = null;
                 }
             });
-            history.replaceState({ page: 'home', product: null }, '', '');
+            
+            // Sync current state with history
+            history.replaceState({ page: this.currentPage, product: this.activeProduct }, '', window.location.hash);
         },
 
         navigateTo(page, product = null, push = true) {
@@ -123,11 +138,19 @@
             this.selectedQuantity = 1;
             this.mobileMenuOpen = false;
             this.cartOpen = false;
+            
             if(page === 'checkout') this.checkoutStep = 1;
+            
             if (push) {
                 history.pushState({ page, product }, '', '#' + page);
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        openModal(img) {
+            this.modalImg = img;
+            // Push a state so the back button closes the modal instead of changing the page
+            history.pushState({ page: this.currentPage, product: this.activeProduct, isModal: true }, '', window.location.hash);
         },
         addToCart(product, portion) {
             let price = product.price;
@@ -312,7 +335,7 @@
                     <template x-for="product in products" :key="product.id">
                         <div class="group cursor-pointer">
                             <div class="relative aspect-[3/4] overflow-hidden rounded-[2.5rem] md:rounded-[3rem] bg-white shadow-xl transition-all duration-700 group-hover:shadow-2xl">
-                                <img :src="product.img" :alt="product.name" @click="modalImg = product.img" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 cursor-zoom-in">
+                                <img :src="product.img" :alt="product.name" @click="openModal(product.img)" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 cursor-zoom-in">
                                 <div @click="navigateTo('product', product)" class="absolute inset-0 bg-gradient-to-t from-lamyat-brown/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
                                 <div @click="navigateTo('product', product)" class="absolute bottom-8 md:bottom-10 left-8 md:left-10 right-8 md:right-10 text-white">
                                     <h3 class="font-serif text-2xl md:text-3xl font-bold italic mb-2" x-text="product.name"></h3>
@@ -340,7 +363,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
                     <div class="lg:sticky lg:top-32 space-y-8 md:space-y-12">
-                        <img :src="mainImg" @click="modalImg = mainImg" class="w-full aspect-square object-cover rounded-[2.5rem] md:rounded-[4rem] shadow-2xl transition-all duration-500 cursor-zoom-in hover:scale-[1.02]">
+                        <img :src="mainImg" @click="openModal(mainImg)" class="w-full aspect-square object-cover rounded-[2.5rem] md:rounded-[4rem] shadow-2xl transition-all duration-500 cursor-zoom-in hover:scale-[1.02]">
                         
                         <!-- Product Variations (Interactive) -->
                         <div class="grid grid-cols-4 gap-4">
