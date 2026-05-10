@@ -634,28 +634,11 @@
                 <!-- Step 2: Payment -->
                 <div x-show="checkoutStep === 2" x-cloak class="space-y-10">
                     <div>
-                        <h2 class="font-serif text-4xl font-bold italic">Payment</h2>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40 mt-1">Select your method and review your tray</p>
+                        <h2 class="font-serif text-4xl font-bold italic text-lamyat-brown">Checkout: Payment</h2>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40 mt-1">Review your tray and select payment method</p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button @click="paymentMethod = 'gcash'" :class="paymentMethod === 'gcash' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold focus:outline-none">
-                            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-black">G</div>
-                            <span class="font-bold uppercase tracking-widest text-[10px]">GCash</span>
-                        </button>
-                        <button @click="paymentMethod = 'maya'" :class="paymentMethod === 'maya' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold focus:outline-none">
-                            <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center text-white font-black">M</div>
-                            <span class="font-bold uppercase tracking-widest text-[10px]">Maya</span>
-                        </button>
-                        <button @click="paymentMethod = 'card'" :class="paymentMethod === 'card' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold focus:outline-none">
-                            <div class="w-12 h-12 bg-lamyat-brown rounded-xl flex items-center justify-center text-white">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                            </div>
-                            <span class="font-bold uppercase tracking-widest text-[10px]">Card</span>
-                        </button>
-                    </div>
-
-                    <!-- Unified Order Summary & Total -->
+                    <!-- 1. Unified Order Summary & Total -->
                     <div class="bg-white rounded-[2rem] border-2 border-lamyat-brown/5 overflow-hidden shadow-sm">
                         <div class="p-8 space-y-6">
                             <h3 class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-gold">Order Summary</h3>
@@ -668,7 +651,6 @@
                                         </div>
                                         <div>
                                             <p class="font-bold text-sm" x-text="item.displayName"></p>
-                                            <!-- Qty & Remove controls -->
                                             <div class="mt-2 flex items-center space-x-3">
                                                 <div class="flex items-center border border-lamyat-brown/10 rounded-full px-2 py-0.5">
                                                     <button @click="updateQty(item.id, -1)" class="px-1 text-xs font-black hover:text-lamyat-gold focus:outline-none">-</button>
@@ -682,53 +664,97 @@
                                     <span class="font-bold text-sm" x-text="'₱' + (item.finalPrice * item.quantity)"></span>
                                 </div>
                             </template>                        
-                        <!-- Total Row -->
+                                <div x-show="ribbonBox" class="py-4 flex justify-between items-center text-lamyat-gold">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 rounded-xl bg-lamyat-gold/10 flex items-center justify-center text-xl">🎀</div>
+                                        <p class="font-bold text-sm">Premium Ribboned Box</p>
+                                    </div>
+                                    <span class="font-bold text-sm">+₱100</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="bg-lamyat-cream/50 p-8 border-t-2 border-lamyat-brown/5 flex justify-between items-center">
                             <span class="font-black uppercase tracking-[0.2em] text-[10px] text-lamyat-brown/40">Total to Pay</span>
                             <span class="text-4xl font-serif font-bold italic text-lamyat-brown" x-text="'₱' + cartTotal"></span>
                         </div>
                     </div>
 
-                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-lamyat-brown/5">
+                    <!-- 2. Payment Details (QR / Card Form) -->
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-lamyat-brown/5 transition-all">
                         <div x-show="paymentMethod !== 'card'" class="text-center py-6">
-                            <p class="text-sm text-lamyat-brown/60 mb-6">Redirecting to <span class="font-bold uppercase" x-text="paymentMethod"></span> for <span class="font-bold text-lamyat-brown" x-text="'₱' + cartTotal"></span>.</p>
-                            <div class="w-32 h-32 bg-lamyat-cream mx-auto rounded-3xl flex items-center justify-center mb-6"><svg class="h-16 w-16 text-lamyat-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg></div>
-                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-lamyat-gold">Scan QR to pay</p>
+                            <p class="text-sm text-lamyat-brown/60 mb-6 font-medium">Scan QR to pay with <span class="font-black uppercase text-lamyat-gold" x-text="paymentMethod"></span> for <span class="font-black text-lamyat-brown" x-text="'₱' + cartTotal"></span>.</p>
+                            <div class="w-32 h-32 bg-lamyat-cream mx-auto rounded-3xl flex items-center justify-center mb-6 shadow-inner"><svg class="h-16 w-16 text-lamyat-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg></div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-lamyat-gold animate-pulse">Awaiting Payment...</p>
                         </div>
                         <div x-show="paymentMethod === 'card'" x-cloak class="space-y-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">Card Number</label>
-                                <input type="text" placeholder="XXXX XXXX XXXX XXXX" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold outline-none">
+                                <input type="text" placeholder="XXXX XXXX XXXX XXXX" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-5 rounded-2xl focus:border-lamyat-gold outline-none transition-all">
                             </div>
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-2"><label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">Expiry</label><input type="text" placeholder="MM/YY" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold outline-none"></div>
-                                <div class="space-y-2"><label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">CVC</label><input type="password" placeholder="***" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-4 rounded-2xl focus:border-lamyat-gold outline-none"></div>
+                                <div class="space-y-2"><label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">Expiry</label><input type="text" placeholder="MM/YY" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-5 rounded-2xl focus:border-lamyat-gold outline-none transition-all"></div>
+                                <div class="space-y-2"><label class="text-[10px] font-black uppercase tracking-widest text-lamyat-brown/40">CVC</label><input type="password" placeholder="***" class="w-full bg-lamyat-cream/30 border-2 border-lamyat-brown/5 p-5 rounded-2xl focus:border-lamyat-gold outline-none transition-all"></div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- 3. Payment Options Buttons -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button @click="paymentMethod = 'gcash'" :class="paymentMethod === 'gcash' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold focus:outline-none group">
+                            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-black shadow-lg transform group-hover:scale-110 transition-transform">G</div>
+                            <span class="font-bold uppercase tracking-widest text-[10px]">GCash</span>
+                        </button>
+                        <button @click="paymentMethod = 'maya'" :class="paymentMethod === 'maya' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold focus:outline-none group">
+                            <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center text-white font-black shadow-lg transform group-hover:scale-110 transition-transform">M</div>
+                            <span class="font-bold uppercase tracking-widest text-[10px]">Maya</span>
+                        </button>
+                        <button @click="paymentMethod = 'card'" :class="paymentMethod === 'card' ? 'border-lamyat-gold bg-lamyat-gold/5' : 'border-lamyat-brown/5 bg-white'" class="border-2 p-6 rounded-3xl flex flex-col items-center space-y-4 transition-all hover:border-lamyat-gold focus:outline-none group">
+                            <div class="w-12 h-12 bg-lamyat-brown rounded-xl flex items-center justify-center text-white shadow-lg transform group-hover:scale-110 transition-transform">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                            </div>
+                            <span class="font-bold uppercase tracking-widest text-[10px]">Card</span>
+                        </button>
+                    </div>
+
                     <div class="flex items-center justify-between pt-8 border-t border-lamyat-brown/10">
-                        <button @click="checkoutStep = 1" class="text-lamyat-brown/40 font-bold uppercase tracking-widest text-xs hover:text-lamyat-brown transition-colors">Back</button>
-                        <button @click="processPayment()" class="bg-lamyat-brown text-white font-bold px-12 py-5 rounded-full hover:bg-lamyat-gold transition-all shadow-xl uppercase tracking-widest text-sm">Pay <span x-text="'₱' + cartTotal"></span></button>
+                        <button @click="checkoutStep = 1" class="text-lamyat-brown/40 font-bold uppercase tracking-widest text-xs hover:text-lamyat-brown transition-colors focus:outline-none">Back</button>
+                        <button @click="processPayment()" class="bg-lamyat-brown text-white font-bold px-12 py-6 rounded-full hover:bg-lamyat-gold transition-all shadow-2xl uppercase tracking-[0.2em] text-xs active:scale-95 focus:outline-none">Confirm & Pay <span x-text="'₱' + cartTotal"></span></button>
                     </div>
                 </div>
 
                 <!-- Step 3: Success -->
-                <div x-show="checkoutStep === 3" x-cloak class="text-center space-y-8 py-12">
-                    <div class="w-24 h-24 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce"><svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></div>
-                    <h2 class="font-serif text-7xl font-bold italic text-lamyat-gold">Salamat!</h2>
-                    <p class="text-xl text-lamyat-brown/60">Your order is being baked right now. <br> A warm confirmation email is waiting in your inbox!</p>
-                    <div class="inline-block bg-white p-6 rounded-3xl border-2 border-lamyat-gold/10 shadow-sm">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 bg-lamyat-gold/20 rounded-full flex items-center justify-center text-xl">📧</div>
-                            <div class="text-left">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-lamyat-gold">Next Step</p>
-                                <p class="text-sm font-bold">Check your email to confirm</p>
+                <div x-show="checkoutStep === 3" x-cloak class="text-center space-y-16 py-12">
+                    <div class="space-y-6 animate-fade-in">
+                        <div class="w-32 h-32 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce border-8 border-white">
+                            <svg class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                        <div>
+                            <h2 class="font-serif text-8xl font-bold italic text-lamyat-gold tracking-tighter">Salamat!</h2>
+                            <p class="text-2xl text-lamyat-brown/60 max-w-md mx-auto leading-relaxed mt-4 font-medium">Your order is being baked right now. <br> Check your inbox for your confirmation!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto px-4">
+                        <div class="bg-white p-10 rounded-[3rem] border-2 border-lamyat-gold/10 shadow-xl flex flex-col items-center justify-center space-y-6 transform hover:scale-105 transition-all">
+                            <div class="w-16 h-16 bg-lamyat-gold/20 rounded-2xl flex items-center justify-center text-3xl">📧</div>
+                            <div class="text-center">
+                                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-lamyat-gold mb-2">Order Tracking</h4>
+                                <p class="text-base font-bold text-lamyat-brown">Confirmation Email Sent</p>
+                                <p class="text-xs text-lamyat-brown/40 mt-1">Please check your spam folder too.</p>
+                            </div>
+                        </div>
+                        <div class="bg-lamyat-brown text-lamyat-cream p-10 rounded-[3rem] shadow-2xl flex flex-col items-center justify-center space-y-6 transform hover:scale-105 transition-all">
+                            <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl">🚚</div>
+                            <div class="text-center">
+                                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-lamyat-gold mb-2">Wait Time</h4>
+                                <p class="text-base font-bold">1-3 Hours within Manila</p>
+                                <p class="text-xs opacity-40 mt-1">Baked fresh to order.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="pt-4">
-                        <button @click="navigateTo('home')" class="bg-lamyat-brown text-white font-bold px-12 py-5 rounded-full uppercase tracking-widest text-xs">Back to Home</button>
+
+                    <div class="pt-8">
+                        <button @click="navigateTo('home')" class="bg-white text-lamyat-brown border-2 border-lamyat-brown/5 font-black px-16 py-6 rounded-full hover:bg-lamyat-gold hover:text-white transition-all shadow-xl uppercase tracking-[0.3em] text-xs active:scale-95 focus:outline-none">Back to Home</button>
                     </div>
                 </div>
             </div>
